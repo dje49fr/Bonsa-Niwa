@@ -1,4 +1,4 @@
-// Configuration des actions
+// Configuration des actions (inchangée)
 const ACTION_TYPES = {
     taille: "Taille",
     rempotage: "Rempotage",
@@ -9,12 +9,10 @@ const ACTION_TYPES = {
 };
 
 const STORAGE_KEY = 'niwaData_v2_with_photos'; 
-
 let bonsais = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 
-// --- Fonctions d'affichage et de prévisualisation ---
+// --- Fonctions d'affichage et de prévisualisation (inchangées) ---
 
-// Affiche la photo sélectionnée dans le formulaire avant l'ajout
 function previewImage() {
     const fileInput = document.getElementById('photoInput');
     const preview = document.getElementById('imagePreview');
@@ -24,7 +22,6 @@ function previewImage() {
         const reader = new FileReader();
 
         reader.onload = function(e) {
-            // Affiche l'image dans l'aperçu, mais NE stocke PAS le Base64 globalement.
             preview.src = e.target.result;
             preview.style.display = 'block';
         };
@@ -35,23 +32,6 @@ function previewImage() {
         preview.src = '';
     }
 }
-
-// Nouvelle fonction qui lit la photo et renvoie une promesse (pour attendre la conversion)
-function readImageAsBase64(file) {
-    return new Promise((resolve, reject) => {
-        if (!file) {
-            resolve(null); // Pas de fichier = pas de Base64, on continue
-            return;
-        }
-        
-        const reader = new FileReader();
-        reader.onload = (e) => resolve(e.target.result);
-        reader.onerror = (error) => reject(error);
-        
-        reader.readAsDataURL(file);
-    });
-}
-
 
 function renderBonsais() {
     const list = document.getElementById('bonsaiList');
@@ -107,10 +87,9 @@ function renderBonsais() {
     });
 }
 
-// --- Fonctions d'action et de sauvegarde ---
+// --- Nouvelle fonction addBonsai utilisant le callback simple (plus stable) ---
 
-// L'ajout de fiche devient asynchrone pour attendre la photo
-async function addBonsai() {
+function addBonsai() {
     const nameInput = document.getElementById('nameInput');
     const speciesInput = document.getElementById('speciesInput');
     const fileInput = document.getElementById('photoInput');
@@ -120,45 +99,62 @@ async function addBonsai() {
         return;
     }
     
-    // Désactiver le bouton pendant le chargement (surtout pour les grosses photos)
     const addButton = document.querySelector('.btn-primary');
-    addButton.disabled = true;
-    addButton.textContent = 'Chargement...';
-
-    // 1. Lire l'image en Base64 et attendre que ce soit terminé
-    let photoBase64 = null;
-    if (fileInput.files && fileInput.files[0]) {
-        try {
-            photoBase64 = await readImageAsBase64(fileInput.files[0]);
-        } catch (error) {
-            console.error("Erreur lors de la lecture du fichier photo:", error);
-            alert("Erreur lors du chargement de la photo. Veuillez réessayer.");
-            addButton.disabled = false;
-            addButton.textContent = 'Ajouter au jardin';
-            return;
-        }
-    }
-
-    // 2. Créer la nouvelle fiche
+    
+    // 1. Initialiser la fiche
     const newBonsai = {
         name: nameInput.value,
         species: speciesInput.value,
-        photoBase64: photoBase64, // <-- Maintenant, on est sûr que la photoBase64 est prête
+        photoBase64: null, // Sera rempli par le FileReader
         actions: {}
     };
 
-    bonsais.unshift(newBonsai);
-    saveData();
-    renderBonsais();
+    // 2. Vérifier si un fichier est sélectionné
+    if (fileInput.files && fileInput.files[0]) {
+        
+        // Désactiver le bouton pendant le traitement
+        addButton.disabled = true;
+        addButton.textContent = 'Chargement photo...';
+
+        const reader = new FileReader();
+
+        // Ce code s'exécute SEULEMENT après que la lecture du fichier est TERMINÉE
+        reader.onload = function(e) {
+            
+            // 3. Stocker le Base64 et ajouter la fiche
+            newBonsai.photoBase64 = e.target.result;
+            
+            bonsais.unshift(newBonsai);
+            saveAndReset(); // Fonction utilitaire
+        };
+
+        reader.onerror = function() {
+            alert("Erreur lors de la lecture de la photo.");
+            saveAndReset();
+        }
+
+        reader.readAsDataURL(fileInput.files[0]); // Déclenche la lecture
+        
+    } else {
+        // 4. Si pas de photo, ajouter directement sans délai
+        bonsais.unshift(newBonsai);
+        saveAndReset();
+    }
     
-    // 3. Réinitialisation du formulaire
-    nameInput.value = '';
-    speciesInput.value = '';
-    fileInput.value = null; // Efface le champ file
-    document.getElementById('imagePreview').style.display = 'none';
-    
-    addButton.disabled = false;
-    addButton.textContent = 'Ajouter au jardin';
+    function saveAndReset() {
+        // Sauvegarde et rafraîchissement
+        saveData();
+        renderBonsais();
+        
+        // Réinitialisation du formulaire et du bouton
+        nameInput.value = '';
+        speciesInput.value = '';
+        fileInput.value = null; 
+        document.getElementById('imagePreview').style.display = 'none';
+        
+        addButton.disabled = false;
+        addButton.textContent = 'Ajouter au jardin';
+    }
 }
 
 function performAction(index) {
