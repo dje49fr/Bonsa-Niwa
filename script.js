@@ -8,14 +8,13 @@ const ACTION_TYPES = {
     engrais: "Engrais"
 };
 
-const STORAGE_KEY = 'niwaData_v2_with_photos'; // Nouvelle clé de stockage
+const STORAGE_KEY = 'niwaData_v2_with_photos'; 
 
 let bonsais = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 let currentImageBase64 = null; // Variable pour stocker la photo du formulaire
 
-// --- Fonctions d'affichage et de prévisualisation ---
+// --- Fonctions d'affichage et de prévisualisation (inchangées) ---
 
-// Affiche la photo sélectionnée dans le formulaire avant l'ajout
 function previewImage() {
     const fileInput = document.getElementById('photoInput');
     const preview = document.getElementById('imagePreview');
@@ -25,11 +24,8 @@ function previewImage() {
         const reader = new FileReader();
 
         reader.onload = function(e) {
-            // 1. Affiche l'image dans l'aperçu du formulaire
             preview.src = e.target.result;
             preview.style.display = 'block';
-            
-            // 2. Stocke la chaîne Base64 pour l'ajout
             currentImageBase64 = e.target.result;
         };
 
@@ -48,48 +44,46 @@ function renderBonsais() {
 
     bonsais.forEach((bonsai, index) => {
         const div = document.createElement('div');
-        div.className = 'card';
+        div.className = 'bonsai-grid-item'; // Nouvelle classe pour la mosaïque
 
-        // Gérer l'affichage de l'image et du texte dans le header
-        const imageHTML = bonsai.photoBase64 
-            ? `<img src="${bonsai.photoBase64}" class="bonsai-image" alt="${bonsai.name}">`
-            : '';
-            
-        // Affichage des dates (inchangé)
-        let actionsHTML = '<div class="action-grid">';
-        for (const [key, label] of Object.entries(ACTION_TYPES)) {
-            const dateVal = bonsai.actions[key];
-            if (dateVal) { 
-                const dateDisplay = new Date(dateVal).toLocaleDateString('fr-FR');
-                actionsHTML += `
-                    <div class="action-row">
-                        <span class="action-label">${label}</span>
-                        <span class="action-date">${dateDisplay}</span>
-                    </div>
-                `;
-            }
+        // Image : utilise l'image ou une icône générique si elle manque
+        const imageSrc = bonsai.photoBase64 
+            ? bonsai.photoBase64
+            : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><path fill="#ccc" d="M576 109.5v352c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64v-352c0-35.3 28.7-64 64-64h448c35.3 0 64 28.7 64 64zM64 432h448V109.5c0-10.6-8.6-19.2-19.2-19.2H83.2c-10.6 0-19.2 8.6-19.2 19.2V432zM320 224a96 96 0 1 0 0 192 96 96 0 0 0 0-192z"/></svg>';
+        
+        // Affichage des badges d'actions (Max 3 actions récentes)
+        let badgesHTML = '';
+        const actionsDone = Object.keys(bonsai.actions).filter(key => bonsai.actions[key] !== null);
+        
+        // Afficher seulement les 3 dernières actions
+        const recentActions = actionsDone.sort((a, b) => new Date(bonsai.actions[b]) - new Date(bonsai.actions[a])).slice(0, 3);
+
+        recentActions.forEach(key => {
+            const label = ACTION_TYPES[key];
+            badgesHTML += `<span class="action-badge" title="${label} : ${new Date(bonsai.actions[key]).toLocaleDateString()}">${label}</span>`;
+        });
+        
+        if (recentActions.length === 0) {
+            badgesHTML = `<span class="action-badge" style="background:#f9f9f9; color:#999;">Pas d'actions</span>`;
         }
-        if (actionsHTML === '<div class="action-grid">') {
-            actionsHTML += '<div class="action-row" style="justify-content:center; color:#999;">Aucun historique enregistré</div>';
-        }
-        actionsHTML += '</div>';
 
         // Menu déroulant (inchangé)
         let optionsHTML = '';
         for (const [key, label] of Object.entries(ACTION_TYPES)) {
             optionsHTML += `<option value="${key}">${label}</option>`;
         }
-
+        
+        // Structure de la carte en mosaïque
         div.innerHTML = `
-            <div class="bonsai-header">
-                ${imageHTML}
+            <img src="${imageSrc}" class="bonsai-image-grid" alt="Photo de ${bonsai.name}">
+            
+            <div class="bonsai-info-grid">
                 <h3>${bonsai.name}</h3>
                 <span class="species">${bonsai.species}</span>
+                <div class="action-badges">${badgesHTML}</div>
             </div>
             
-            ${actionsHTML}
-
-            <div class="action-control">
+            <div class="action-control-overlay">
                 <select id="action-select-${index}">${optionsHTML}</select>
                 <button onclick="performAction(${index})" class="btn-act" title="Noter l'action"><i class="fas fa-check"></i></button>
                 <button onclick="deleteBonsai(${index})" class="btn-delete" title="Supprimer l'arbre"><i class="fas fa-trash"></i></button>
@@ -99,7 +93,7 @@ function renderBonsais() {
     });
 }
 
-// --- Fonctions d'action et de sauvegarde ---
+// --- Fonctions d'action et de sauvegarde (inchangées) ---
 
 function addBonsai() {
     const name = document.getElementById('nameInput').value;
@@ -110,7 +104,7 @@ function addBonsai() {
     const newBonsai = {
         name: name,
         species: species,
-        photoBase64: currentImageBase64, // <-- Ajout de la photo ici
+        photoBase64: currentImageBase64, 
         actions: {}
     };
 
@@ -121,7 +115,7 @@ function addBonsai() {
     // Réinitialisation du formulaire
     document.getElementById('nameInput').value = '';
     document.getElementById('speciesInput').value = '';
-    document.getElementById('photoInput').value = null; // Efface le champ file
+    document.getElementById('photoInput').value = null; 
     document.getElementById('imagePreview').style.display = 'none';
     currentImageBase64 = null;
 }
