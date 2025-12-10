@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bonsaïs Niwa</title>
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4e342e">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="icon" type="image/png" href="icon-192.png">
+</head>
+<body>
+
+    <header>
+        <div class="header-content">
+            <h1><i class="fas fa-torii-gate"></i> Bonsaïs Niwa</h1>
+        </div>
+        <button onclick="resetData()" class="btn-reset"><i class="fas fa-sync"></i></button>
+    </header>
+
+    <div class="container">
+        <div class="card add-form">
+            <h2><i class="fas fa-seedling"></i> Nouvel Arbre</h2>
+            <input type="text" id="nameInput" placeholder="Nom (ex: Érable de Deshojo)">
+            <input type="text" id="speciesInput" placeholder="Espèce / Style">
+            <button onclick="addBonsai()" class="btn-primary">Ajouter au jardin</button>
+        </div>
+
+        <div id="bonsaiList"></div>
+    </div>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+            .then(() => console.log("Jardin connecté (SW OK)"))
+            .catch((err) => console.log("Erreur SW:", err));
+        }
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>
