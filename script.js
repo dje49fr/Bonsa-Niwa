@@ -11,10 +11,10 @@ const ACTION_TYPES = {
 const STORAGE_KEY = 'niwaData_v2_with_photos'; 
 
 let bonsais = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-let currentImageBase64 = null; // Variable pour stocker la photo du formulaire
 
-// --- Fonctions d'affichage et de prévisualisation (inchangées) ---
+// --- Fonctions d'affichage et de prévisualisation ---
 
+// Affiche la photo sélectionnée dans le formulaire avant l'ajout
 function previewImage() {
     const fileInput = document.getElementById('photoInput');
     const preview = document.getElementById('imagePreview');
@@ -24,17 +24,32 @@ function previewImage() {
         const reader = new FileReader();
 
         reader.onload = function(e) {
+            // Affiche l'image dans l'aperçu, mais NE stocke PAS le Base64 globalement.
             preview.src = e.target.result;
             preview.style.display = 'block';
-            currentImageBase64 = e.target.result;
         };
 
         reader.readAsDataURL(file);
     } else {
         preview.style.display = 'none';
         preview.src = '';
-        currentImageBase64 = null;
     }
+}
+
+// Nouvelle fonction qui lit la photo et renvoie une promesse (pour attendre la conversion)
+function readImageAsBase64(file) {
+    return new Promise((resolve, reject) => {
+        if (!file) {
+            resolve(null); // Pas de fichier = pas de Base64, on continue
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = (error) => reject(error);
+        
+        reader.readAsDataURL(file);
+    });
 }
 
 
@@ -44,7 +59,7 @@ function renderBonsais() {
 
     bonsais.forEach((bonsai, index) => {
         const div = document.createElement('div');
-        div.className = 'bonsai-grid-item'; // Nouvelle classe pour la mosaïque
+        div.className = 'bonsai-grid-item'; 
 
         // Image : utilise l'image ou une icône générique si elle manque
         const imageSrc = bonsai.photoBase64 
@@ -55,7 +70,6 @@ function renderBonsais() {
         let badgesHTML = '';
         const actionsDone = Object.keys(bonsai.actions).filter(key => bonsai.actions[key] !== null);
         
-        // Afficher seulement les 3 dernières actions
         const recentActions = actionsDone.sort((a, b) => new Date(bonsai.actions[b]) - new Date(bonsai.actions[a])).slice(0, 3);
 
         recentActions.forEach(key => {
@@ -93,18 +107,43 @@ function renderBonsais() {
     });
 }
 
-// --- Fonctions d'action et de sauvegarde (inchangées) ---
+// --- Fonctions d'action et de sauvegarde ---
 
-function addBonsai() {
-    const name = document.getElementById('nameInput').value;
-    const species = document.getElementById('speciesInput').value;
+// L'ajout de fiche devient asynchrone pour attendre la photo
+async function addBonsai() {
+    const nameInput = document.getElementById('nameInput');
+    const speciesInput = document.getElementById('speciesInput');
+    const fileInput = document.getElementById('photoInput');
 
-    if (!name) return alert("Il faut donner un nom à l'arbre.");
+    if (!nameInput.value) {
+        alert("Il faut donner un nom à l'arbre !");
+        return;
+    }
+    
+    // Désactiver le bouton pendant le chargement (surtout pour les grosses photos)
+    const addButton = document.querySelector('.btn-primary');
+    addButton.disabled = true;
+    addButton.textContent = 'Chargement...';
 
+    // 1. Lire l'image en Base64 et attendre que ce soit terminé
+    let photoBase64 = null;
+    if (fileInput.files && fileInput.files[0]) {
+        try {
+            photoBase64 = await readImageAsBase64(fileInput.files[0]);
+        } catch (error) {
+            console.error("Erreur lors de la lecture du fichier photo:", error);
+            alert("Erreur lors du chargement de la photo. Veuillez réessayer.");
+            addButton.disabled = false;
+            addButton.textContent = 'Ajouter au jardin';
+            return;
+        }
+    }
+
+    // 2. Créer la nouvelle fiche
     const newBonsai = {
-        name: name,
-        species: species,
-        photoBase64: currentImageBase64, 
+        name: nameInput.value,
+        species: speciesInput.value,
+        photoBase64: photoBase64, // <-- Maintenant, on est sûr que la photoBase64 est prête
         actions: {}
     };
 
@@ -112,12 +151,14 @@ function addBonsai() {
     saveData();
     renderBonsais();
     
-    // Réinitialisation du formulaire
-    document.getElementById('nameInput').value = '';
-    document.getElementById('speciesInput').value = '';
-    document.getElementById('photoInput').value = null; 
+    // 3. Réinitialisation du formulaire
+    nameInput.value = '';
+    speciesInput.value = '';
+    fileInput.value = null; // Efface le champ file
     document.getElementById('imagePreview').style.display = 'none';
-    currentImageBase64 = null;
+    
+    addButton.disabled = false;
+    addButton.textContent = 'Ajouter au jardin';
 }
 
 function performAction(index) {
