@@ -20,11 +20,18 @@
             <h1><i class="fas fa-torii-gate"></i> Bonsaïs Niwa</h1>
         </div>
         <button onclick="resetData()" class="btn-reset" title="Tout effacer"><i class="fas fa-sync"></i></button>
+        <button onclick="toggleAddForm(true)" class="btn-add-float" title="Ajouter un arbre"><i class="fas fa-plus"></i></button>
     </header>
 
     <div class="container">
+        <div id="bonsaiList"></div>
+    </div>
+    
+    <div id="addFormOverlay" class="overlay">
         <div class="card add-form">
+            <button onclick="toggleAddForm(false)" class="btn-close-form"><i class="fas fa-times"></i></button>
             <h2><i class="fas fa-seedling"></i> Nouvel Arbre</h2>
+            
             <input type="text" id="nameInput" placeholder="Nom (ex: Érable de Deshojo)">
             <input type="text" id="speciesInput" placeholder="Espèce / Style">
             
@@ -39,10 +46,8 @@
 
             <button onclick="addBonsai()" class="btn-primary">Ajouter au jardin</button>
         </div>
-
-        <div id="bonsaiList"></div>
     </div>
-
+    
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js')
