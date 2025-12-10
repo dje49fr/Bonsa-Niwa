@@ -4,74 +4,106 @@ body { background-color: #f3f4f6; color: #2d2d2d; padding-bottom: 80px; }
 header { background: #4e342e; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 100; }
 header h1 { font-size: 1.4rem; font-weight: 600; letter-spacing: 0.5px; }
 .btn-reset { background: transparent; color: #a1887f; font-size: 1rem; padding: 5px; }
-.container { padding: 20px; max-width: 600px; margin: 0 auto; }
-.card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-top: 4px solid #558b2f; transition: transform 0.2s; position: relative; } /* Important: position: relative */
-.add-form { border-top: 4px solid #4e342e; }
+.container { padding: 20px; max-width: 900px; margin: 0 auto; } /* Augmenté la largeur pour la grille */
+.add-form { border-top: 4px solid #4e342e; margin-bottom: 30px; }
 .add-form h2 { font-size: 1.1rem; margin-bottom: 15px; color: #4e342e; }
 input[type="text"] { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fafafa; font-size: 16px; }
 input[type="text"]:focus { border-color: #558b2f; outline: none; background: #fff; }
 button { border: none; cursor: pointer; border-radius: 8px; font-weight: 600; transition: 0.2s; }
 .btn-primary { background: #4e342e; color: white; width: 100%; padding: 12px; font-size: 1rem; }
-h3 { color: #2e2e2e; font-size: 1.3rem; margin-bottom: 4px; }
-.species { color: #757575; font-style: italic; font-size: 0.9rem; margin-bottom: 15px; display: block; }
-.action-grid { display: grid; grid-template-columns: 1fr; gap: 8px; margin-bottom: 15px; background: #f1f8e9; padding: 10px; border-radius: 8px; }
-.action-row { display: flex; justify-content: space-between; font-size: 0.9rem; border-bottom: 1px solid #dcedc8; padding-bottom: 4px; margin-bottom: 4px; }
-.action-row:last-child { border-bottom: none; margin-bottom: 0; }
-.action-label { color: #33691e; font-weight: 600; }
-.action-date { color: #555; }
-.action-control { display: flex; gap: 8px; margin-top: 15px; }
-select { flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 8px; background: white; }
-.btn-act { background: #558b2f; color: white; padding: 0 20px; }
-.btn-delete { background: #ef5350; color: white; padding: 0 12px; }
-
-/* --- Nouveaux styles pour la photo --- */
-
-/* Bouton pour sélectionner la photo */
-.photo-label {
-    display: block;
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 12px;
-    background: #e0e0e0; /* Couleur grise pour la sélection */
-    color: #4e342e;
-    text-align: center;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-}
+.photo-label { display: block; width: 100%; padding: 12px; margin-bottom: 12px; background: #e0e0e0; color: #4e342e; text-align: center; border-radius: 8px; cursor: pointer; font-weight: 600; }
 .photo-label:hover { background: #ccc; }
+#imagePreviewContainer { width: 100px; height: 100px; margin: 0 auto 15px auto; overflow: hidden; border-radius: 12px; border: 1px solid #ccc; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+#imagePreview { width: 100%; height: 100%; object-fit: cover; }
 
-/* Styles pour la prévisualisation dans le formulaire d'ajout */
-#imagePreviewContainer {
-    width: 100px; /* Taille fixe */
-    height: 100px;
-    margin: 0 auto 15px auto;
-    overflow: hidden; /* Cache les débordements si l'image n'est pas carrée */
-    border-radius: 12px; /* Bords arrondis */
-    border: 1px solid #ccc;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+/* --- NOUVEAUX STYLES MOSAÏQUE (Grid) --- */
+
+/* Conteneur de la grille */
+#bonsaiList {
+    display: grid;
+    /* 2 colonnes par défaut sur mobile (minimum 150px par colonne) */
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px; /* Espace entre les cartes */
 }
-#imagePreview {
+
+/* Style de la carte dans la grille */
+.bonsai-grid-item {
+    background: white;
+    border-radius: 12px;
+    padding: 0; /* Suppression du padding car l'image sera pleine */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    overflow: hidden; /* Important pour que l'image épouse le bord arrondi */
+    border: 1px solid #ddd;
+    position: relative;
+    cursor: pointer;
+}
+
+/* Image pleine sur la carte */
+.bonsai-grid-item .bonsai-image-grid {
     width: 100%;
-    height: 100%;
-    object-fit: cover; /* Assure que l'image couvre le conteneur sans être déformée */
-}
-
-/* Styles pour l'image dans la liste des bonsaïs */
-.bonsai-image {
-    width: 80px; /* Taille de l'image dans la liste */
-    height: 80px;
-    overflow: hidden;
-    border-radius: 12px; /* Bords arrondis */
-    float: left; /* Aligner à gauche du texte */
-    margin-right: 15px;
+    height: 150px; /* Hauteur fixe pour un look homogène */
     object-fit: cover;
-    border: 2px solid #558b2f;
+    display: block;
 }
 
-/* Clearfix pour gérer le float de l'image */
-.bonsai-header:after {
-    content: "";
-    display: table;
-    clear: both;
+/* Zone d'information (sous l'image) */
+.bonsai-info-grid {
+    padding: 10px;
+    padding-bottom: 70px; /* Espace pour les boutons de contrôle */
+}
+
+/* Titres dans la grille */
+.bonsai-info-grid h3 {
+    font-size: 1.1rem;
+    margin-bottom: 2px;
+    color: #4e342e;
+}
+.bonsai-info-grid .species {
+    font-size: 0.8rem;
+    color: #757575;
+    margin-bottom: 5px;
+}
+
+/* Badges pour les actions (pour savoir rapidement ce qui est fait) */
+.action-badge {
+    display: inline-block;
+    background: #e6ee9c; /* Vert très clair */
+    color: #33691e;
+    font-size: 0.7rem;
+    padding: 3px 6px;
+    border-radius: 4px;
+    margin-right: 4px;
+    margin-bottom: 4px;
+}
+
+/* Contrôles d'action (boutons, sélecteur) */
+.action-control-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    padding: 8px;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.action-control-overlay select {
+    flex-grow: 1;
+    padding: 6px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+.action-control-overlay .btn-act { padding: 6px 10px; font-size: 0.8rem; }
+.action-control-overlay .btn-delete { padding: 6px 8px; font-size: 0.8rem; }
+
+
+/* --- NOUVEAU STYLE POUR L'AFFICHAGE DÉTAILLÉ (lorsqu'on clique sur une carte) --- */
+
+/* La grille ne montre qu'un aperçu des dates.
+   Nous devons ajouter une vue plus détaillée si l'utilisateur clique. */
+.detailed-view {
+    /* Style pour la future vue détaillée si vous voulez l'ajouter plus tard */
 }
