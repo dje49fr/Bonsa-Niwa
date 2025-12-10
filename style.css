@@ -1,45 +1,93 @@
-/* --- NOUVEAUX STYLES POUR LE BOUTON FLOTTANT ET LE FORMULAIRE --- */
+/* --- Styles de base --- */
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+body { background-color: #f3f4f6; color: #2d2d2d; padding-bottom: 80px; }
+
+/* COULEURS DU HEADER CORRIGÉES */
+header { 
+    background: #4e342e; /* Marron foncé */
+    color: #fff; 
+    padding: 15px 20px; 
+    display: flex; justify-content: space-between; align-items: center; 
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2); 
+    position: sticky; top: 0; z-index: 100; 
+}
+header h1 { font-size: 1.4rem; font-weight: 600; letter-spacing: 0.5px; }
+.btn-reset { 
+    background: transparent; 
+    color: #a1887f; /* Couleur de l'icône de reset dans le header */
+    font-size: 1rem; padding: 5px; 
+}
+
+.container { padding: 20px; max-width: 900px; margin: 0 auto; } 
+.add-form { border-top: 4px solid #4e342e; margin-bottom: 0; }
+.add-form h2 { font-size: 1.1rem; margin-bottom: 15px; color: #4e342e; }
+input[type="text"] { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fafafa; font-size: 16px; }
+input[type="text"]:focus { border-color: #558b2f; outline: none; background: #fff; }
+button { border: none; cursor: pointer; border-radius: 8px; font-weight: 600; transition: 0.2s; }
+.btn-primary { background: #4e342e; color: white; width: 100%; padding: 12px; font-size: 1rem; }
+
+/* Styles de la zone d'ajout de photo dans le formulaire */
+.photo-label { display: block; width: 100%; padding: 12px; margin-bottom: 12px; background: #e0e0e0; color: #4e342e; text-align: center; border-radius: 8px; cursor: pointer; font-weight: 600; }
+.photo-label:hover { background: #ccc; }
+#imagePreviewContainer { width: 100px; height: 100px; margin: 0 auto 15px auto; overflow: hidden; border-radius: 12px; border: 1px solid #ccc; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+#imagePreview { width: 100%; height: 100%; object-fit: cover; }
+
+/* --- STYLES MOSAÏQUE (Grid) --- */
+#bonsaiList { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+.bonsai-grid-item { background: white; border-radius: 12px; padding: 0; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #ddd; position: relative; cursor: pointer; }
+.bonsai-grid-item .bonsai-image-grid { width: 100%; height: 150px; object-fit: cover; display: block; }
+.bonsai-info-grid { padding: 10px; padding-bottom: 70px; }
+.bonsai-info-grid h3 { font-size: 1.1rem; margin-bottom: 2px; color: #4e342e; }
+.bonsai-info-grid .species { font-size: 0.8rem; color: #757575; margin-bottom: 5px; }
+.action-badge { display: inline-block; background: #e6ee9c; color: #33691e; font-size: 0.7rem; padding: 3px 6px; border-radius: 4px; margin-right: 4px; margin-bottom: 4px; }
+.action-control-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: #fff; padding: 8px; border-top: 1px solid #eee; display: flex; gap: 5px; align-items: center; }
+.action-control-overlay select { flex-grow: 1; padding: 6px; border-radius: 4px; font-size: 0.8rem; }
+.action-control-overlay .btn-act { background: #558b2f; color: white; padding: 6px 10px; font-size: 0.8rem; }
+.action-control-overlay .btn-delete { background: #ef5350; color: white; padding: 6px 8px; font-size: 0.8rem; }
+
+
+/* --- STYLES DU BOUTON FLOTTANT ET DU FORMULAIRE CORRIGÉS --- */
 
 /* Bouton + en haut à droite (Flottant) */
 .btn-add-float {
-    position: fixed; /* Reste fixe même en scrollant */
-    top: 15px; /* Aligné avec l'entête */
-    right: 20px;
+    position: fixed; 
+    top: 15px; 
+    right: 70px; /* Décalé à gauche du bouton Reset */
     width: 40px;
     height: 40px;
-    background: #558b2f; /* Vert pour l'action */
-    color: white;
-    border-radius: 50%; /* Rond parfait */
+    background: #558b2f; 
+    color: white; /* COULEUR DE L'ICÔNE EN BLANC COMME DEMANDÉ */
+    border-radius: 50%; 
     font-size: 1.2rem;
     line-height: 40px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    z-index: 1000; /* Assure qu'il est au-dessus de tout */
+    z-index: 1000;
 }
 
-/* Le conteneur du formulaire qui couvre tout l'écran */
 .overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.7); /* Fond sombre semi-transparent */
-    display: none; /* Caché par défaut */
+    background: rgba(0, 0, 0, 0.7); 
+    display: none; 
     justify-content: center;
     align-items: center;
     z-index: 2000;
+    overflow-y: auto; 
+    padding: 20px 0;
 }
 
-/* La carte du formulaire à l'intérieur de l'overlay */
-.overlay .add-form {
+.overlay .card {
     max-width: 450px;
     width: 90%;
-    margin: 20px;
-    animation: slideIn 0.3s ease-out; /* Petite animation d'arrivée */
+    margin: auto; 
+    animation: slideIn 0.3s ease-out; 
     position: relative;
+    padding: 20px; 
 }
 
-/* Bouton pour fermer le formulaire */
 .btn-close-form {
     position: absolute;
     top: 10px;
@@ -50,14 +98,7 @@
     padding: 5px;
 }
 
-/* Animation pour l'ouverture du formulaire */
 @keyframes slideIn {
     from { transform: translateY(100%); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
-}
-
-/* Mise à jour : Enlève la marge de l'ancienne add-form */
-.add-form {
-    /* Ancienne marge : margin-bottom: 20px; */ 
-    margin-bottom: 0; /* Important pour l'overlay */
 }
