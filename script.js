@@ -1,257 +1,359 @@
-// Configuration des types d'actions (HISTORIQUE)
+// --- CONFIGURATION ---
 const ACTION_TYPES = {
-    taille: "Taille de maintien",
+    taille: "Taille",
+    ligature: "Ligature", 
     rempotage: "Rempotage",
     effeuillage: "Effeuillage",
-    ligature: "Ligature",
-    engrais: "Engrais" 
+    engrais: "Engrais",
+    traitement: "Traitement",
+    arrosage: "Arrosage spécifique"
 };
 
-// Configuration des types d'interventions futures (CALENDRIER PRÉVU)
 const FUTURE_ACTIONS = {
     rempotage: "Rempotage prévu",
-    engrais: "Prochain apport d'engrais",
-    taille: "Taille de structure / Pinçage"
+    ligature: "Pose/Retrait Ligature",
+    engrais: "Prochain engrais",
+    taille: "Taille de structure"
 };
 
-const STORAGE_KEY = 'niwaData_v2'; 
+// --- LISTE GÉANTE DES ARBRES (+300 Entrées) ---
+const ALL_SPECIES = [
+    "Acer buergerianum (Érable Trident)", "Acer campestre (Érable champêtre)", "Acer ginnala (Érable du fleuve Amour)", "Acer monspessulanum (Érable de Montpellier)", "Acer palmatum (Érable du Japon)", "Acer palmatum 'Deshojo'", "Acer palmatum 'Kiyohime'", "Acer palmatum 'Shishigashira'", "Acer rubrum (Érable rouge)", "Adansonia digitata (Baobab)", "Adenium obesum (Rose du désert)", "Aesculus hippocastanum (Marronnier)",
+    "Albizia julibrissin (Arbre à soie)", "Alnus glutinosa (Aulne glutineux)", "Amelanchier canadensis", "Araucaria heterophylla", "Arbutus unedo (Arbousier)", "Azalea (Azalée Satsuki)", "Berberis thunbergii (Epine-vinette)", "Betula pendula (Bouleau blanc)", "Bougainvillea glabra (Bougainvillier)", "Buxus harlandii (Buis de Chine)", "Buxus sempervirens (Buis commun)",
+    "Callicarpa japonica", "Camellia japonica (Camélia)", "Carmona microphylla (Théier de Fukien)", "Carpinus betulus (Charme commun)", "Carpinus coreana (Charme de Corée)", "Carpinus turczaninowii", "Cedrus atlantica (Cèdre de l'Atlas)", "Cedrus deodara (Cèdre de l'Himalaya)", "Cedrus libani (Cèdre du Liban)", "Celtis australis (Micocoulier)", "Celtis sinensis (Micocoulier de Chine)",
+    "Chaenomeles japonica (Cognassier du Japon)", "Chamaecyparis obtusa (Faux cyprès Hinoki)", "Chamaecyparis pisifera", "Citrus aurantium (Oranger)", "Citrus limon (Citronnier)", "Citrus reticulata (Mandarinier)", "Cornus mas (Cornouiller mâle)", "Corylus avellana (Noisetier)", "Cotoneaster horizontalis", "Cotoneaster microphyllus", "Crassula ovata (Arbre de Jade)",
+    "Crataegus laevigata (Aubépine)", "Crataegus monogyna", "Cryptomeria japonica (Cèdre du Japon)", "Cupressus macrocarpa (Cyprès de Lambert)", "Cupressus sempervirens (Cyprès de Provence)", "Cydonia oblonga (Cognassier)", "Desmodium", "Diospyros kaki (Plaquemilier)", "Elaeagnus pungens", "Enkianthus perulatus", "Eugenia uniflora", "Euonymus alatus (Fusain ailé)", "Euonymus europaeus",
+    "Fagus crenata (Hêtre du Japon)", "Fagus sylvatica (Hêtre commun)", "Ficus benjamina", "Ficus carica (Figuier commun)", "Ficus microcarpa (Ginseng)", "Ficus nerifolia", "Ficus retusa (Figuier Banyan)", "Forsythia intermedia", "Fraxinus angustifolia (Frêne)", "Fraxinus excelsior", "Fuchsia magellanica", "Gardenia jasminoides", "Ginkgo biloba (Arbre aux 40 écus)",
+    "Gleditsia triacanthos (Févier)", "Grevillea robusta", "Hedera helix (Lierre)", "Hibiscus syriacus (Althea)", "Ilex crenata (Houx crénelé)", "Ilex serrata", "Jacaranda mimosifolia", "Jasminum nudiflorum (Jasmin d'hiver)", "Juniperus chinensis (Genévrier de Chine)", "Juniperus chinensis 'Itoigawa'", "Juniperus chinensis 'Shimpaku'", "Juniperus communis (Genévrier commun)", "Juniperus procumbens 'Nana'",
+    "Juniperus rigida (Genévrier rigide)", "Juniperus sabina", "Juniperus squamata", "Lagerstroemia indica (Lilas des Indes)", "Larix decidua (Mélèze d'Europe)", "Larix kaempferi (Mélèze du Japon)", "Laurus nobilis (Laurier sauce)", "Leptospermum scoparium (Manuka)", "Ligustrum sinense (Troène de Chine)", "Ligustrum vulgare (Troène commun)", "Liquidambar styraciflua (Copalme)", "Lonicera nitida (Chèvrefeuille)",
+    "Loropetalum chinense", "Magnolia grandiflora", "Magnolia stellata", "Malus 'Evereste'", "Malus halliana (Pommier à fleurs)", "Malus sylvestris (Pommier sauvage)", "Metasequoia glyptostroboides", "Morus alba (Mûrier blanc)", "Morus nigra (Mûrier noir)", "Murraya paniculata", "Myrtus communis (Myrte)", "Nandina domestica (Bambou sacré)", "Olea europaea (Olivier)", "Olea europaea 'Sylvestris' (Oléastre)",
+    "Operculicarya decaryi", "Osmanthus fragrans", "Parrotia persica", "Parthenocissus tricuspidata (Vigne vierge)", "Picea abies (Epicéa commun)", "Picea glauca 'Conica'", "Picea jezoensis (Epicéa du Japon)", "Pinus densiflora (Pin rouge du Japon)", "Pinus halepensis (Pin d'Alep)", "Pinus mugo (Pin Mugho)", "Pinus nigra (Pin noir)", "Pinus parviflora (Pin blanc du Japon)", "Pinus pentaphylla",
+    "Pinus pinea (Pin parasol)", "Pinus ponderosa", "Pinus sylvestris (Pin sylvestre)", "Pinus thunbergii (Pin noir du Japon)", "Pistacia lentiscus (Pistachier lentisque)", "Pittosporum tobira", "Platanus acerifolia (Platane)", "Podocarpus macrophyllus (Pin des bouddhistes)", "Polyscias fruticosa", "Populus nigra (Peuplier noir)", "Populus tremula (Tremble)", "Portulacaria afra (Arbre à éléphant)",
+    "Potentilla fruticosa (Potentille)", "Prunus armeniaca (Abricotier)", "Prunus avium (Merisier)", "Prunus cerasifera (Prunier Pissardi)", "Prunus incisa (Cerisier Fuji)", "Prunus mahaleb (Bois de Sainte-Lucie)", "Prunus mume (Abricotier du Japon)", "Prunus serrulata (Cerisier du Japon)", "Prunus spinosa (Prunellier)", "Pseudocydonia sinensis (Cognassier de Chine)", "Pseudolarix amabilis (Mélèze doré)",
+    "Punica granatum (Grenadier)", "Punica granatum 'Nana'", "Pyracantha angustifolia", "Pyracantha coccinea (Buisson ardent)", "Quercus cerris (Chêne chevelu)", "Quercus coccifera (Chêne kermès)", "Quercus ilex (Chêne vert)", "Quercus pubescens (Chêne pubescent)", "Quercus robur (Chêne pédonculé)", "Quercus suber (Chêne liège)", "Rhododendron indicum", "Robinia pseudoacacia (Robinier)", "Rosmarinus officinalis (Romarin)",
+    "Sageretia theezans", "Salix babylonica (Saule pleureur)", "Schefflera arboricola", "Schinus molle (Faux poivrier)", "Sciadopitys verticillata", "Serissa foetida (Neige de juin)", "Sorbus aucuparia (Sorbier)", "Stewartia monadelpha", "Syringa vulgaris (Lilas)", "Tamarix (Tamaris)", "Taxodium distichum (Cyprès chauve)", "Taxus baccata (If commun)", "Taxus cuspidata (If du Japon)",
+    "Thuja occidentalis (Thuya)", "Thymus vulgaris (Thym)", "Tilia cordata (Tilleul à petites feuilles)", "Tilia platyphyllos", "Trachelospermum jasminoides", "Tsuga canadensis", "Tsuga heterophylla", "Ulmus glabra", "Ulmus minor (Orme champêtre)", "Ulmus parvifolia (Orme de Chine)", "Ulmus procera", "Ulmus pumila (Orme de Sibérie)", "Viburnum opulus", "Wisteria floribunda (Glycine)", "Wisteria sinensis",
+    "Zanthoxylum piperitum (Poivrier du Japon)", "Zelkova carpinifolia", "Zelkova nire", "Zelkova serrata (Orme du Japon)"
+];
 
-let bonsais = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-let currentBonsaiIndex = null; 
+// --- GESTION INDEXEDDB (Base de données) ---
+let db;
+const DB_NAME = "NiwaDB";
+const DB_VERSION = 1;
 
-// =======================================================
-// GESTION DES IMAGES (Conversion en Base64)
-// =======================================================
-
-function handleImageUpload(input) {
-    if (input.files && input.files[0]) {
-        const file = input.files[0];
-        // Vérification de la taille (ex: max 500KB)
-        if (file.size > 500 * 1024) { 
-            alert("L'image est trop volumineuse (> 500KB). Veuillez utiliser une image plus petite pour le LocalStorage.");
-            input.value = ''; // Réinitialise l'input
-            return;
-        }
-
-        const reader = new FileReader();
-        
-        reader.onload = function(e) {
-            // e.target.result contient l'image encodée en Base64
-            bonsais[currentBonsaiIndex].image = e.target.result;
-            saveData();
-            showDetails(currentBonsaiIndex); // Rafraîchit l'affichage
+function initDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onerror = (event) => console.error("Erreur DB", event);
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains('bonsais')) {
+                db.createObjectStore('bonsais', { keyPath: 'id', autoIncrement: true });
+            }
         };
-        
-        reader.readAsDataURL(file);
-    }
+        request.onsuccess = (event) => {
+            db = event.target.result;
+            console.log("DB Ouverte avec succès");
+            loadList();
+            populateDatalist(); // On charge la liste géante ici
+            resolve(db);
+        };
+    });
 }
 
-// =======================================================
-// AFFICHER/CACHER LA FICHE DÉTAILLÉE (MODAL)
-// =======================================================
+// Fonction pour remplir la datalist
+function populateDatalist() {
+    const dataList = document.getElementById('speciesList');
+    dataList.innerHTML = '';
+    ALL_SPECIES.forEach(species => {
+        const option = document.createElement('option');
+        option.value = species;
+        dataList.appendChild(option);
+    });
+}
 
-function showDetails(index) {
-    currentBonsaiIndex = index;
-    const bonsai = bonsais[index];
+// Variables globales
+let currentImageBase64 = null;
+let currentEditingId = null;
 
-    // 1. Informations de base
-    document.getElementById('detailName').textContent = bonsai.name;
-    document.getElementById('detailSpecies').textContent = bonsai.species || 'Non spécifié';
-    document.getElementById('detailPurchaseDate').textContent = bonsai.purchaseDate || 'Inconnue';
+// --- OUVERTURE / FERMETURE MODALE ---
 
-    // 2. Image (avec l'image principale pour le bonsaï)
-    const imageElement = document.getElementById('detailImage');
+function openCreateModal() {
+    // Mode CRÉATION
+    currentEditingId = null;
+    currentImageBase64 = null;
+    
+    document.getElementById('detailNameInput').value = '';
+    document.getElementById('detailSpeciesInput').value = '';
+    document.getElementById('detailDateInput').value = '';
+    document.getElementById('notesArea').value = '';
+    
+    document.getElementById('detailImageDisplay').src = '';
+    document.getElementById('detailImageDisplay').style.display = 'none';
+    document.getElementById('imageUpload').value = '';
+
+    document.getElementById('btnSaveNew').style.display = 'block'; 
+    document.getElementById('editModeSections').style.display = 'none'; 
+    
+    document.getElementById('detailModal').style.display = 'flex';
+}
+
+function openEditModal(bonsai) {
+    // Mode ÉDITION
+    currentEditingId = bonsai.id;
+    currentImageBase64 = bonsai.image;
+
+    document.getElementById('detailNameInput').value = bonsai.name;
+    document.getElementById('detailSpeciesInput').value = bonsai.species;
+    document.getElementById('detailDateInput').value = bonsai.purchaseDate;
+    document.getElementById('notesArea').value = bonsai.notes;
+
     if (bonsai.image) {
-        imageElement.src = bonsai.image;
-        imageElement.style.display = 'block';
+        document.getElementById('detailImageDisplay').src = bonsai.image;
+        document.getElementById('detailImageDisplay').style.display = 'block';
     } else {
-        imageElement.src = '';
-        imageElement.style.display = 'none';
+        document.getElementById('detailImageDisplay').style.display = 'none';
     }
 
-    // 3. Reste des sections (Historique, Calendrier, Notes)
-    // ... (Le code des sections 2, 3 et 4 est inchangé ici) ...
-    
-    // Historique des actions (Actions passées)
-    const historyList = document.getElementById('historyList');
-    historyList.innerHTML = '';
-    
-    // Remplir le select pour l'ajout d'une action passée
-    let pastActionOptions = '';
-    for (const [key, label] of Object.entries(ACTION_TYPES)) {
-        pastActionOptions += `<option value="${key}">${label}</option>`;
-    }
-    document.getElementById('pastActionSelect').innerHTML = pastActionOptions;
+    document.getElementById('btnSaveNew').style.display = 'none'; 
+    document.getElementById('editModeSections').style.display = 'block'; 
 
-    // Affichage des actions passées
-    for (const [key, date] of Object.entries(bonsai.history)) {
-        if (date) {
-            const dateDisplay = new Date(date).toLocaleDateString('fr-FR');
-            historyList.innerHTML += `<div class="action-row"><span class="action-label">${ACTION_TYPES[key] || key}</span><span class="action-date">${dateDisplay}</span></div>`;
-        }
-    }
-    if (historyList.innerHTML === '') historyList.innerHTML = '<p class="no-entry">Aucune intervention enregistrée.</p>';
-
-    // Calendrier futur (Interventions prévues)
-    const futureList = document.getElementById('futureList');
-    futureList.innerHTML = '';
-    
-    // Ajout des options pour le SELECT futur
-    let futureOptions = '';
-    for (const [key, label] of Object.entries(FUTURE_ACTIONS)) {
-        futureOptions += `<option value="${key}">${label}</option>`;
-    }
-    document.getElementById('futureActionSelect').innerHTML = futureOptions;
-
-    // Affichage des dates déjà prévues
-    for (const [key, date] of Object.entries(bonsai.futurePlan)) {
-        if (date) {
-            const dateDisplay = new Date(date).toLocaleDateString('fr-FR');
-            futureList.innerHTML += `<div class="action-row"><span class="action-label">${FUTURE_ACTIONS[key] || key}</span><span class="action-date">${dateDisplay}</span><button onclick="deleteFutureAction('${key}')" class="btn-delete-small"><i class="fas fa-times"></i></button></div>`;
-        }
-    }
-    if (futureList.innerHTML === '') futureList.innerHTML = '<p class="no-entry">Aucune intervention future planifiée.</p>';
-
-    // Espace Notes/Intervention
-    document.getElementById('notesArea').value = bonsai.notes || '';
-
+    renderHistory(bonsai.history);
+    renderFuture(bonsai.futurePlan);
+    fillSelects();
 
     document.getElementById('detailModal').style.display = 'flex';
 }
 
-function hideDetails() {
-    saveNotes(); 
+function closeModal() {
     document.getElementById('detailModal').style.display = 'none';
-    currentBonsaiIndex = null;
 }
 
-// =======================================================
-// GESTION DES DONNÉES
-// =======================================================
-
-function renderBonsais() {
-    const list = document.getElementById('bonsaiList');
-    list.innerHTML = '';
-
-    bonsais.forEach((bonsai, index) => {
-        const div = document.createElement('div');
-        div.className = 'card';
-
-        // Affichage simplifié pour la liste principale
-        let historyPreview = 'Pas d\'historique.';
-        const actionsDates = Object.entries(bonsai.history).map(([key, date]) => ({key, date: new Date(date)})).filter(item => !isNaN(item.date));
-        actionsDates.sort((a, b) => b.date - a.date);
-        
-        if (actionsDates.length > 0) {
-            const lastAction = actionsDates[0];
-            historyPreview = `${ACTION_TYPES[lastAction.key] || lastAction.key} : ${lastAction.date.toLocaleDateString('fr-FR')}`;
-        }
-        
-        // Ajout d'une miniature d'image si elle existe
-        const imagePreview = bonsai.image ? `<img src="${bonsai.image}" alt="Miniature" class="bonsai-thumbnail">` : '';
-
-        div.innerHTML = `
-            ${imagePreview}
-            <div class="card-text">
-                <h3>${bonsai.name}</h3>
-                <span class="species">${bonsai.species || 'Espèce non renseignée'}</span>
-                <p class="history-preview">Dernière action : ${historyPreview}</p>
-            </div>
-            <div class="card-controls">
-                <button onclick="showDetails(${index})" class="btn-secondary"><i class="fas fa-info-circle"></i> Fiche complète</button>
-                <button onclick="deleteBonsai(${index})" class="btn-delete-small"><i class="fas fa-trash"></i></button>
-            </div>
-        `;
-        list.appendChild(div);
-    });
+// --- GESTION IMAGE ---
+function handleImagePreview(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            currentImageBase64 = e.target.result; 
+            const img = document.getElementById('detailImageDisplay');
+            img.src = currentImageBase64;
+            img.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
 }
 
-function addBonsai() {
-    const name = document.getElementById('nameInput').value;
-    const species = document.getElementById('speciesInput').value;
-    const purchaseDate = document.getElementById('purchaseDateInput').value; 
+// --- CRUD ---
 
-    if (!name) return alert("Il faut donner un nom à l'arbre.");
+function saveNewBonsai() {
+    const name = document.getElementById('detailNameInput').value;
+    if (!name) return alert("Le nom est obligatoire");
 
     const newBonsai = {
         name: name,
-        species: species,
-        purchaseDate: purchaseDate,
-        history: {},     
-        futurePlan: {},  
-        notes: '',
-        image: ''        // NOUVEAU : Champ pour l'image Base64
+        species: document.getElementById('detailSpeciesInput').value,
+        purchaseDate: document.getElementById('detailDateInput').value,
+        image: currentImageBase64,
+        notes: document.getElementById('notesArea').value,
+        history: [],
+        futurePlan: []
     };
 
-    bonsais.unshift(newBonsai); 
-    saveData();
-    renderBonsais();
-    
-    // Nettoyage
-    document.getElementById('nameInput').value = '';
-    document.getElementById('speciesInput').value = '';
-    document.getElementById('purchaseDateInput').value = '';
+    const transaction = db.transaction(['bonsais'], 'readwrite');
+    const store = transaction.objectStore('bonsais');
+    store.add(newBonsai);
+
+    transaction.oncomplete = () => {
+        closeModal();
+        loadList();
+    };
 }
 
-function performAction() {
-    if (currentBonsaiIndex === null) return;
+function updateCurrentBonsai() {
+    if (!currentEditingId) return;
+
+    const transaction = db.transaction(['bonsais'], 'readwrite');
+    const store = transaction.objectStore('bonsais');
+    const request = store.get(currentEditingId);
+
+    request.onsuccess = () => {
+        const data = request.result;
+        data.name = document.getElementById('detailNameInput').value;
+        data.species = document.getElementById('detailSpeciesInput').value;
+        data.purchaseDate = document.getElementById('detailDateInput').value;
+        data.notes = document.getElementById('notesArea').value;
+        data.image = currentImageBase64; 
+        
+        store.put(data);
+        closeModal();
+        loadList();
+    };
+}
+
+function loadList() {
+    const list = document.getElementById('bonsaiList');
+    list.innerHTML = '';
     
-    const selectedAction = document.getElementById('pastActionSelect').value;
+    const transaction = db.transaction(['bonsais'], 'readonly');
+    const store = transaction.objectStore('bonsais');
+    const request = store.getAll();
+
+    request.onsuccess = () => {
+        const bonsais = request.result;
+        
+        if (bonsais.length === 0) {
+            document.getElementById('emptyMessage').style.display = 'block';
+        } else {
+            document.getElementById('emptyMessage').style.display = 'none';
+            bonsais.reverse().forEach(bonsai => {
+                createCard(bonsai, list);
+            });
+        }
+    };
+}
+
+function createCard(bonsai, container) {
+    const div = document.createElement('div');
+    div.className = 'card';
     
-    bonsais[currentBonsaiIndex].history[selectedAction] = new Date().toISOString().split('T')[0];
-    saveData();
-    showDetails(currentBonsaiIndex); 
-    renderBonsais(); 
+    const imgHTML = bonsai.image 
+        ? `<img src="${bonsai.image}" class="bonsai-thumbnail">` 
+        : `<div class="bonsai-thumbnail placeholder"><i class="fas fa-seedling"></i></div>`;
+
+    let lastAction = "Pas d'intervention";
+    if (bonsai.history && bonsai.history.length > 0) {
+        const last = bonsai.history[bonsai.history.length - 1];
+        lastAction = `${last.type} (${new Date(last.date).toLocaleDateString('fr-FR')})`;
+    }
+
+    div.innerHTML = `
+        ${imgHTML}
+        <div class="card-text">
+            <h3>${bonsai.name}</h3>
+            <span class="species">${bonsai.species || 'Inconnu'}</span>
+            <p class="history-preview">${lastAction}</p>
+        </div>
+        <div class="card-actions">
+            <button onclick="deleteBonsai(${bonsai.id})" class="btn-delete-icon"><i class="fas fa-trash"></i></button>
+        </div>
+    `;
+    
+    div.addEventListener('click', (e) => {
+        if(!e.target.closest('.btn-delete-icon')) {
+            openEditModal(bonsai);
+        }
+    });
+
+    container.appendChild(div);
+}
+
+function deleteBonsai(id) {
+    if(confirm("Supprimer cet arbre définitivement ?")) {
+        const transaction = db.transaction(['bonsais'], 'readwrite');
+        transaction.objectStore('bonsais').delete(id);
+        transaction.oncomplete = () => loadList();
+    }
+}
+
+function resetDatabase() {
+    if(confirm("ATTENTION : CELA VA TOUT EFFACER !")) {
+        const req = indexedDB.deleteDatabase(DB_NAME);
+        req.onsuccess = () => window.location.reload();
+    }
+}
+
+// --- GESTION ACTIONS ---
+
+function fillSelects() {
+    const pastSelect = document.getElementById('pastActionSelect');
+    const futureSelect = document.getElementById('futureActionSelect');
+    pastSelect.innerHTML = '';
+    futureSelect.innerHTML = '';
+
+    for (const [key, val] of Object.entries(ACTION_TYPES)) {
+        pastSelect.innerHTML += `<option value="${val}">${val}</option>`;
+    }
+    for (const [key, val] of Object.entries(FUTURE_ACTIONS)) {
+        futureSelect.innerHTML += `<option value="${val}">${val}</option>`;
+    }
+}
+
+function addHistoryAction() {
+    if (!currentEditingId) return;
+    const type = document.getElementById('pastActionSelect').value;
+    const date = new Date().toISOString().split('T')[0];
+
+    const transaction = db.transaction(['bonsais'], 'readwrite');
+    const store = transaction.objectStore('bonsais');
+    
+    store.get(currentEditingId).onsuccess = (e) => {
+        const data = e.target.result;
+        if (!data.history) data.history = [];
+        data.history.push({ type, date });
+        store.put(data);
+        renderHistory(data.history);
+    };
 }
 
 function addFutureAction() {
-    if (currentBonsaiIndex === null) return;
-    
-    const action = document.getElementById('futureActionSelect').value;
+    if (!currentEditingId) return;
+    const type = document.getElementById('futureActionSelect').value;
     const date = document.getElementById('futureDateInput').value;
+    if (!date) return alert("Date requise");
 
-    if (!date) return alert("Veuillez choisir une date pour l'intervention future.");
+    const transaction = db.transaction(['bonsais'], 'readwrite');
+    const store = transaction.objectStore('bonsais');
     
-    bonsais[currentBonsaiIndex].futurePlan[action] = date;
-    saveData();
-    showDetails(currentBonsaiIndex); 
+    store.get(currentEditingId).onsuccess = (e) => {
+        const data = e.target.result;
+        if (!data.futurePlan) data.futurePlan = [];
+        data.futurePlan.push({ type, date });
+        store.put(data);
+        renderFuture(data.futurePlan);
+    };
 }
 
-function deleteFutureAction(actionType) {
-    if (currentBonsaiIndex === null) return;
+function renderHistory(history) {
+    const container = document.getElementById('historyList');
+    container.innerHTML = '';
+    if (!history || history.length === 0) return;
 
-    delete bonsais[currentBonsaiIndex].futurePlan[actionType];
-    saveData();
-    showDetails(currentBonsaiIndex); 
+    history.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(h => {
+        container.innerHTML += `
+            <div class="action-row">
+                <span class="action-label">${h.type}</span>
+                <span class="action-date">${new Date(h.date).toLocaleDateString('fr-FR')}</span>
+            </div>
+        `;
+    });
 }
 
-function saveNotes() {
-    if (currentBonsaiIndex === null) return;
-    bonsais[currentBonsaiIndex].notes = document.getElementById('notesArea').value;
-    saveData();
+function renderFuture(plan) {
+    const container = document.getElementById('futureList');
+    container.innerHTML = '';
+    if (!plan || plan.length === 0) return;
+
+    plan.sort((a,b) => new Date(a.date) - new Date(b.date)).forEach((p, index) => {
+        container.innerHTML += `
+            <div class="action-row">
+                <span class="action-label">${p.type}</span>
+                <span class="action-date">${new Date(p.date).toLocaleDateString('fr-FR')}</span>
+                <i class="fas fa-times" style="color:red; cursor:pointer;" onclick="removeFuture(${index})"></i>
+            </div>
+        `;
+    });
 }
 
-
-function deleteBonsai(index) {
-    if(confirm('Supprimer définitivement cet arbre ?')) {
-        bonsais.splice(index, 1);
-        saveData();
-        renderBonsais();
-        hideDetails();
-    }
+function removeFuture(index) {
+     const transaction = db.transaction(['bonsais'], 'readwrite');
+     const store = transaction.objectStore('bonsais');
+     store.get(currentEditingId).onsuccess = (e) => {
+         const data = e.target.result;
+         data.futurePlan.splice(index, 1);
+         store.put(data);
+         renderFuture(data.futurePlan);
+     };
 }
 
-function resetData() {
-    if(confirm("Attention : Cela va effacer tout ton jardin. Continuer ?")) {
-        localStorage.removeItem(STORAGE_KEY);
-        bonsais = [];
-        renderBonsais();
-        hideDetails();
-    }
-}
-
-function saveData() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(bonsais));
-}
-
-renderBonsais();
+initDB();
