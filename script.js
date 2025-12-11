@@ -17,7 +17,34 @@ const FUTURE_ACTIONS = {
 const STORAGE_KEY = 'niwaData_v2'; 
 
 let bonsais = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-let currentBonsaiIndex = null; // Pour suivre l'arbre actuellement affiché
+let currentBonsaiIndex = null; 
+
+// =======================================================
+// GESTION DES IMAGES (Conversion en Base64)
+// =======================================================
+
+function handleImageUpload(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        // Vérification de la taille (ex: max 500KB)
+        if (file.size > 500 * 1024) { 
+            alert("L'image est trop volumineuse (> 500KB). Veuillez utiliser une image plus petite pour le LocalStorage.");
+            input.value = ''; // Réinitialise l'input
+            return;
+        }
+
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            // e.target.result contient l'image encodée en Base64
+            bonsais[currentBonsaiIndex].image = e.target.result;
+            saveData();
+            showDetails(currentBonsaiIndex); // Rafraîchit l'affichage
+        };
+        
+        reader.readAsDataURL(file);
+    }
+}
 
 // =======================================================
 // AFFICHER/CACHER LA FICHE DÉTAILLÉE (MODAL)
@@ -32,7 +59,20 @@ function showDetails(index) {
     document.getElementById('detailSpecies').textContent = bonsai.species || 'Non spécifié';
     document.getElementById('detailPurchaseDate').textContent = bonsai.purchaseDate || 'Inconnue';
 
-    // 2. Historique des actions (Actions passées)
+    // 2. Image (avec l'image principale pour le bonsaï)
+    const imageElement = document.getElementById('detailImage');
+    if (bonsai.image) {
+        imageElement.src = bonsai.image;
+        imageElement.style.display = 'block';
+    } else {
+        imageElement.src = '';
+        imageElement.style.display = 'none';
+    }
+
+    // 3. Reste des sections (Historique, Calendrier, Notes)
+    // ... (Le code des sections 2, 3 et 4 est inchangé ici) ...
+    
+    // Historique des actions (Actions passées)
     const historyList = document.getElementById('historyList');
     historyList.innerHTML = '';
     
@@ -52,7 +92,7 @@ function showDetails(index) {
     }
     if (historyList.innerHTML === '') historyList.innerHTML = '<p class="no-entry">Aucune intervention enregistrée.</p>';
 
-    // 3. Calendrier futur (Interventions prévues)
+    // Calendrier futur (Interventions prévues)
     const futureList = document.getElementById('futureList');
     futureList.innerHTML = '';
     
@@ -72,14 +112,14 @@ function showDetails(index) {
     }
     if (futureList.innerHTML === '') futureList.innerHTML = '<p class="no-entry">Aucune intervention future planifiée.</p>';
 
-    // 4. Espace Notes/Intervention
+    // Espace Notes/Intervention
     document.getElementById('notesArea').value = bonsai.notes || '';
+
 
     document.getElementById('detailModal').style.display = 'flex';
 }
 
 function hideDetails() {
-    // Sauvegarde des notes avant de cacher
     saveNotes(); 
     document.getElementById('detailModal').style.display = 'none';
     currentBonsaiIndex = null;
@@ -99,7 +139,6 @@ function renderBonsais() {
 
         // Affichage simplifié pour la liste principale
         let historyPreview = 'Pas d\'historique.';
-        // Trouver la dernière action effectuée
         const actionsDates = Object.entries(bonsai.history).map(([key, date]) => ({key, date: new Date(date)})).filter(item => !isNaN(item.date));
         actionsDates.sort((a, b) => b.date - a.date);
         
@@ -107,12 +146,17 @@ function renderBonsais() {
             const lastAction = actionsDates[0];
             historyPreview = `${ACTION_TYPES[lastAction.key] || lastAction.key} : ${lastAction.date.toLocaleDateString('fr-FR')}`;
         }
-
+        
+        // Ajout d'une miniature d'image si elle existe
+        const imagePreview = bonsai.image ? `<img src="${bonsai.image}" alt="Miniature" class="bonsai-thumbnail">` : '';
 
         div.innerHTML = `
-            <h3>${bonsai.name}</h3>
-            <span class="species">${bonsai.species || 'Espèce non renseignée'}</span>
-            <p class="history-preview">Dernière action : ${historyPreview}</p>
+            ${imagePreview}
+            <div class="card-text">
+                <h3>${bonsai.name}</h3>
+                <span class="species">${bonsai.species || 'Espèce non renseignée'}</span>
+                <p class="history-preview">Dernière action : ${historyPreview}</p>
+            </div>
             <div class="card-controls">
                 <button onclick="showDetails(${index})" class="btn-secondary"><i class="fas fa-info-circle"></i> Fiche complète</button>
                 <button onclick="deleteBonsai(${index})" class="btn-delete-small"><i class="fas fa-trash"></i></button>
@@ -133,9 +177,10 @@ function addBonsai() {
         name: name,
         species: species,
         purchaseDate: purchaseDate,
-        history: {},     // Historique des actions passées (type: date)
-        futurePlan: {},  // Calendrier des interventions futures (type: date)
-        notes: ''        // Espace de notes
+        history: {},     
+        futurePlan: {},  
+        notes: '',
+        image: ''        // NOUVEAU : Champ pour l'image Base64
     };
 
     bonsais.unshift(newBonsai); 
@@ -153,11 +198,10 @@ function performAction() {
     
     const selectedAction = document.getElementById('pastActionSelect').value;
     
-    // On enregistre l'action dans l'historique (history) avec la date d'aujourd'hui
     bonsais[currentBonsaiIndex].history[selectedAction] = new Date().toISOString().split('T')[0];
     saveData();
-    showDetails(currentBonsaiIndex); // Rafraîchit la fiche
-    renderBonsais(); // Rafraîchit la liste principale
+    showDetails(currentBonsaiIndex); 
+    renderBonsais(); 
 }
 
 function addFutureAction() {
@@ -170,7 +214,7 @@ function addFutureAction() {
     
     bonsais[currentBonsaiIndex].futurePlan[action] = date;
     saveData();
-    showDetails(currentBonsaiIndex); // Rafraîchit la fiche
+    showDetails(currentBonsaiIndex); 
 }
 
 function deleteFutureAction(actionType) {
@@ -178,7 +222,7 @@ function deleteFutureAction(actionType) {
 
     delete bonsais[currentBonsaiIndex].futurePlan[actionType];
     saveData();
-    showDetails(currentBonsaiIndex); // Rafraîchit la fiche
+    showDetails(currentBonsaiIndex); 
 }
 
 function saveNotes() {
@@ -193,7 +237,7 @@ function deleteBonsai(index) {
         bonsais.splice(index, 1);
         saveData();
         renderBonsais();
-        hideDetails(); // Assurez-vous de cacher la fiche si elle était ouverte
+        hideDetails();
     }
 }
 
