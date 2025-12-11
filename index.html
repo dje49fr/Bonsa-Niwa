@@ -7,7 +7,6 @@
     
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4e342e">
     <link rel="apple-touch-icon" href="icon-192.png">
@@ -19,83 +18,87 @@
         <div class="header-content">
             <h1><i class="fas fa-torii-gate"></i> Bonsaïs Niwa</h1>
         </div>
-        <button onclick="resetData()" class="btn-reset" title="Effacer toutes les données"><i class="fas fa-sync"></i></button>
+        <button onclick="resetDatabase()" class="btn-reset"><i class="fas fa-trash-alt"></i></button>
     </header>
 
     <div class="container">
-        <div class="card add-form">
-            <h2><i class="fas fa-seedling"></i> Nouvel Arbre</h2>
-            <input type="text" id="nameInput" placeholder="Nom (ex: Érable de Deshojo)">
-            <input type="text" id="speciesInput" placeholder="Espèce / Style">
-            <label for="purchaseDateInput">Date d'achat (optionnel)</label>
-            <input type="date" id="purchaseDateInput"> 
-            <button onclick="addBonsai()" class="btn-primary">Ajouter au jardin</button>
-        </div>
-
         <div id="bonsaiList"></div>
+        <p id="emptyMessage" style="text-align: center; color: #888; margin-top: 50px; display: none;">
+            Votre jardin est vide.<br>Appuyez sur + pour planter votre premier bonsaï.
+        </p>
     </div>
 
-    <button class="fab" onclick="document.getElementById('nameInput').focus()"><i class="fas fa-plus"></i></button>
-
+    <button class="fab" onclick="openCreateModal()"><i class="fas fa-plus"></i></button>
 
     <div id="detailModal" class="modal">
         <div class="modal-content">
-            <span class="close-btn" onclick="hideDetails()">&times;</span>
+            <span class="close-btn" onclick="closeModal()">&times;</span>
             
-            <h2 id="detailName" class="modal-title">Nom de l'Arbre</h2>
-            <p class="modal-species">Espèce : <span id="detailSpecies"></span></p>
-            <p class="modal-date-info">Date d'achat : <span id="detailPurchaseDate"></span></p>
+            <div class="modal-header-edit">
+                <label>Nom</label>
+                <input type="text" id="detailNameInput" placeholder="Surnom (ex: Le Vieux Sage)">
+                
+                <div class="row-inputs">
+                    <div style="flex:1; margin-right:5px;">
+                        <label>Espèce</label>
+                        <input type="text" id="detailSpeciesInput" list="speciesList" placeholder="Chercher une espèce...">
+                        <datalist id="speciesList"></datalist>
+                    </div>
+                    <div style="flex:1; margin-left:5px;">
+                        <label>Date Achat</label>
+                        <input type="date" id="detailDateInput">
+                    </div>
+                </div>
+            </div>
 
             <div class="section-card image-section">
-                <h3><i class="fas fa-camera"></i> Photo Principale</h3>
-                <img id="detailImage" src="" alt="Photo du Bonsaï" class="bonsai-photo">
-                <label for="imageUpload">Télécharger / Mettre à jour la photo :</label>
-                <input type="file" id="imageUpload" accept="image/*" onchange="handleImageUpload(this)">
+                <h3><i class="fas fa-camera"></i> Photo</h3>
+                <img id="detailImageDisplay" src="" class="bonsai-photo" style="display:none;">
+                <input type="file" id="imageUpload" accept="image/*" onchange="handleImagePreview(this)">
+                <label for="imageUpload" class="file-upload-btn"><i class="fas fa-upload"></i> Choisir une photo</label>
             </div>
 
             <div class="section-card">
-                <h3><i class="fas fa-history"></i> Historique des Actions</h3>
-                <p class="info-text">Enregistrez les actions réellement effectuées. Cliquez sur "Action du jour" pour enregistrer la date d'aujourd'hui.</p>
-                <div id="historyList" class="action-grid detail-grid">
-                    </div>
-                
-                <div class="action-control">
-                    <select id="pastActionSelect" style="flex-grow: 1;">
-                        </select>
-                    <button onclick="performAction()" class="btn-act"><i class="fas fa-check"></i> Action du jour</button>
-                </div>
+                <h3><i class="fas fa-sticky-note"></i> Notes</h3>
+                <textarea id="notesArea" placeholder="Observations, projet..."></textarea>
             </div>
 
-            <div class="section-card future-plan">
-                <h3><i class="fas fa-calendar-alt"></i> Calendrier Prévu</h3>
-                <p class="info-text">Planifiez les futures interventions. Une seule date par type d'action est conservée.</p>
-                <div id="futureList" class="action-grid detail-grid">
-                    </div>
-                
-                <div class="action-control">
-                    <select id="futureActionSelect" style="flex-grow: 1;">
-                        </select>
-                    <input type="date" id="futureDateInput" style="flex-grow: 1; margin: 0;">
-                    <button onclick="addFutureAction()" class="btn-act" style="padding: 0 10px;">Planifier</button>
-                </div>
-            </div>
+            <button id="btnSaveNew" class="btn-primary" onclick="saveNewBonsai()" style="margin-top: 20px;">
+                <i class="fas fa-save"></i> Créer la fiche
+            </button>
 
-            <div class="section-card">
-                <h3><i class="fas fa-sticky-note"></i> Notes & Observations</h3>
-                <textarea id="notesArea" placeholder="Vos notes, observations sur la santé de l'arbre, projets de design..." onblur="saveNotes()"></textarea>
-                <p class="note-save-info">Les notes sont sauvegardées automatiquement à la fermeture de la fiche.</p>
+            <div id="editModeSections" style="display: none;">
+                
+                <div class="section-card">
+                    <h3><i class="fas fa-history"></i> Historique</h3>
+                    <div id="historyList" class="action-grid detail-grid"></div>
+                    <div class="action-control">
+                        <select id="pastActionSelect"></select>
+                        <button onclick="addHistoryAction()" class="btn-act"><i class="fas fa-check"></i></button>
+                    </div>
+                </div>
+
+                <div class="section-card future-plan">
+                    <h3><i class="fas fa-calendar-alt"></i> Calendrier</h3>
+                    <div id="futureList" class="action-grid detail-grid"></div>
+                    <div class="action-control">
+                        <select id="futureActionSelect"></select>
+                        <input type="date" id="futureDateInput">
+                        <button onclick="addFutureAction()" class="btn-act"><i class="fas fa-clock"></i></button>
+                    </div>
+                </div>
+
+                <button class="btn-primary" onclick="updateCurrentBonsai()" style="margin-top: 20px; background-color: #558b2f;">
+                    <i class="fas fa-sync"></i> Enregistrer les modifications
+                </button>
             </div>
 
         </div>
     </div>
 
-
     <script>
-        // Enregistrement du Service Worker
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js')
-            .then(() => console.log("Jardin connecté (SW OK)"))
-            .catch((err) => console.log("Erreur SW:", err));
+            navigator.serviceWorker.register('./sw.js');
         }
     </script>
     <script src="script.js"></script>
