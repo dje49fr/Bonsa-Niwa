@@ -1,104 +1,198 @@
-/* --- Styles de base --- */
+/* Reset et Base */
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 body { background-color: #f3f4f6; color: #2d2d2d; padding-bottom: 80px; }
 
-/* COULEURS DU HEADER CORRIGÉES */
-header { 
-    background: #4e342e; /* Marron foncé */
-    color: #fff; 
-    padding: 15px 20px; 
-    display: flex; justify-content: space-between; align-items: center; 
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2); 
-    position: sticky; top: 0; z-index: 100; 
+/* En-tête */
+header {
+    background: #4e342e; /* Marron foncé Zen */
+    color: #fff;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
+
 header h1 { font-size: 1.4rem; font-weight: 600; letter-spacing: 0.5px; }
 .btn-reset { 
     background: transparent; 
-    color: #a1887f; /* Couleur de l'icône de reset dans le header */
-    font-size: 1rem; padding: 5px; 
+    color: #a1887f; 
+    font-size: 1rem; 
+    padding: 5px; 
+    border: none;
+    cursor: pointer;
 }
 
-.container { padding: 20px; max-width: 900px; margin: 0 auto; } 
-.add-form { border-top: 4px solid #4e342e; margin-bottom: 0; }
+/* Conteneur */
+.container { padding: 20px; max-width: 600px; margin: 0 auto; }
+
+/* Cartes */
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border-top: 4px solid #558b2f; /* Vert olive */
+    transition: transform 0.2s;
+}
+
+.add-form { border-top: 4px solid #4e342e; }
 .add-form h2 { font-size: 1.1rem; margin-bottom: 15px; color: #4e342e; }
-input[type="text"] { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fafafa; font-size: 16px; }
-input[type="text"]:focus { border-color: #558b2f; outline: none; background: #fff; }
+
+/* Inputs et Boutons */
+input:not([type="date"]) {
+    width: 100%; padding: 12px; margin-bottom: 12px;
+    border: 1px solid #e0e0e0; border-radius: 8px;
+    background: #fafafa; font-size: 16px;
+}
+input[type="date"] {
+    width: 100%; padding: 12px; margin-bottom: 12px;
+    border: 1px solid #e0e0e0; border-radius: 8px;
+    background: #fafafa; font-size: 16px;
+    appearance: none; /* Désactive le style natif iOS/Android */
+}
+input:focus { border-color: #558b2f; outline: none; background: #fff; }
+
+label { display: block; text-align: left; font-size: 0.9rem; color: #757575; margin-bottom: 5px; }
+
 button { border: none; cursor: pointer; border-radius: 8px; font-weight: 600; transition: 0.2s; }
 .btn-primary { background: #4e342e; color: white; width: 100%; padding: 12px; font-size: 1rem; }
+.btn-primary:active { background: #3e2723; }
 
-/* Styles de la zone d'ajout de photo dans le formulaire */
-.photo-label { display: block; width: 100%; padding: 12px; margin-bottom: 12px; background: #e0e0e0; color: #4e342e; text-align: center; border-radius: 8px; cursor: pointer; font-weight: 600; }
-.photo-label:hover { background: #ccc; }
-#imagePreviewContainer { width: 100px; height: 100px; margin: 0 auto 15px auto; overflow: hidden; border-radius: 12px; border: 1px solid #ccc; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-#imagePreview { width: 100%; height: 100%; object-fit: cover; }
+/* Typographie Carte Liste */
+h3 { color: #2e2e2e; font-size: 1.3rem; margin-bottom: 4px; }
+.species { color: #757575; font-style: italic; font-size: 0.9rem; margin-bottom: 5px; display: block; }
 
-/* --- STYLES MOSAÏQUE (Grid) --- */
-#bonsaiList { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
-.bonsai-grid-item { background: white; border-radius: 12px; padding: 0; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #ddd; position: relative; cursor: pointer; }
-.bonsai-grid-item .bonsai-image-grid { width: 100%; height: 150px; object-fit: cover; display: block; }
-.bonsai-info-grid { padding: 10px; padding-bottom: 70px; }
-.bonsai-info-grid h3 { font-size: 1.1rem; margin-bottom: 2px; color: #4e342e; }
-.bonsai-info-grid .species { font-size: 0.8rem; color: #757575; margin-bottom: 5px; }
-.action-badge { display: inline-block; background: #e6ee9c; color: #33691e; font-size: 0.7rem; padding: 3px 6px; border-radius: 4px; margin-right: 4px; margin-bottom: 4px; }
-.action-control-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: #fff; padding: 8px; border-top: 1px solid #eee; display: flex; gap: 5px; align-items: center; }
-.action-control-overlay select { flex-grow: 1; padding: 6px; border-radius: 4px; font-size: 0.8rem; }
-.action-control-overlay .btn-act { background: #558b2f; color: white; padding: 6px 10px; font-size: 0.8rem; }
-.action-control-overlay .btn-delete { background: #ef5350; color: white; padding: 6px 8px; font-size: 0.8rem; }
-
-
-/* --- STYLES DU BOUTON FLOTTANT ET DU FORMULAIRE CORRIGÉS --- */
-
-/* Bouton + en haut à droite (Flottant) */
-.btn-add-float {
-    position: fixed; 
-    top: 15px; 
-    right: 70px; /* Décalé à gauche du bouton Reset */
-    width: 40px;
-    height: 40px;
-    background: #558b2f; 
-    color: white; /* COULEUR DE L'ICÔNE EN BLANC */
-    border-radius: 50%; 
-    font-size: 1.2rem;
-    line-height: 40px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    z-index: 1000;
+/* Contrôles de la liste principale */
+.card-controls {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    gap: 10px;
 }
+.btn-secondary {
+    background: #a1887f; /* Tons terreux */
+    color: white;
+    padding: 10px 15px;
+    flex-grow: 1;
+    font-weight: 500;
+}
+.btn-secondary:active { background: #8d6e63; }
+.history-preview { font-size: 0.9rem; color: #888; margin-top: 5px; }
 
-.overlay {
+/* --- STYLES MODAL --- */
+
+/* Conteneur principal de la modal */
+.modal {
+    display: none; 
     position: fixed;
-    top: 0;
+    z-index: 200; 
     left: 0;
+    top: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.7); 
-    display: none; 
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4); 
+    align-items: flex-start; 
     justify-content: center;
-    align-items: center;
-    z-index: 2000;
-    overflow-y: auto; 
-    padding: 20px 0;
+    padding-top: 20px;
 }
 
-.overlay .card {
-    max-width: 450px;
-    width: 90%;
-    margin: auto; 
-    animation: slideIn 0.3s ease-out; 
+/* Contenu de la fiche */
+.modal-content {
+    background-color: #fefefe;
+    margin: 20px;
+    padding: 20px;
+    border-radius: 12px;
+    width: 95%;
+    max-width: 700px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     position: relative;
-    padding: 20px; 
+    animation: slideUp 0.3s;
 }
 
-.btn-close-form {
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.close-btn {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
     position: absolute;
     top: 10px;
-    right: 10px;
-    background: transparent;
-    color: #4e342e;
-    font-size: 1.2rem;
-    padding: 5px;
+    right: 15px;
 }
+.close-btn:hover,
+.close-btn:focus { color: #4e342e; text-decoration: none; }
 
-@keyframes slideIn {
-    from { transform: translateY(100%); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+/* Titres et Infos de la modal */
+.modal-title { font-size: 1.8rem; color: #4e342e; margin-bottom: 5px; }
+.modal-species, .modal-date-info { color: #757575; font-size: 0.95rem; margin-bottom: 10px; }
+.modal-species span, .modal-date-info span { font-weight: 600; color: #333; }
+
+/* Cartes de section dans la modal */
+.section-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 15px;
+    background: #fdfdfd;
+}
+.section-card h3 {
+    color: #558b2f;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 5px;
+}
+.info-text { font-size: 0.8rem; color: #999; margin-bottom: 10px; }
+
+/* Grille des actions dans la fiche */
+.detail-grid {
+    background: #f1f8e9; /* Vert très pâle */
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+.action-row {
+    display: flex; justify-content: space-between;
+    font-size: 0.9rem; border-bottom: 1px solid #dcedc8; padding-bottom: 4px; margin-bottom: 4px;
+}
+.action-row:last-child { border-bottom: none; margin-bottom: 0; }
+.action-label { color: #33691e; font-weight: 600; }
+.action-date { color: #555; }
+.no-entry { text-align: center; color: #999; font-style: italic; padding: 10px 0; }
+
+/* Champ de Notes */
+#notesArea {
+    width: 100%;
+    min-height: 100px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    margin-top: 10px;
+    resize: vertical;
+}
+.note-save-info { font-size: 0.75rem; color: #999; text-align: center; margin-top: 5px; }
+
+/* Contrôles d'action dans la modal */
+.action-control { display: flex; gap: 8px; margin-top: 15px; }
+select { flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 8px; background: white; }
+.btn-act { background: #558b2f; color: white; padding: 0 20px; }
+.btn-delete-small {
+    background: #ffcdd2; 
+    color: #d32f2f;
+    padding: 5px 8px;
+    font-size: 0.8rem;
+    line-height: 1;
+    margin-left: 5px;
 }
